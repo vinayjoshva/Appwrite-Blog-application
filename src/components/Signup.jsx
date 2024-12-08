@@ -14,18 +14,18 @@ function Signup() {
   const [error, setError] = useState(null);
 
   const signUp = async (data) => {
-    setError("");
+    setError(null);
     try {
       const createSession = await authService.createAccount(data); //i'm going to get authservice and creat an account in sign up session.
       if (createSession) {
         const userData = await authService.getCurrentUser(); //if i'm getting it here, time to update the store
         if (userData) {
-          dispatch(login(userData)); //once userData has been passed to the store from this part, forcefully navigate to the root.
+          dispatch(login({ userData })); // Pass userData explicitly //once userData has been passed to the store from this part, forcefully navigate to the root.
           navigate("/");
         }
       }
     } catch (error) {
-      setError(error.message);
+      setError(error.message || "An error occurred while signing up.");
     }
   };
 
@@ -68,7 +68,7 @@ function Signup() {
               placeholder="Enter your email"
               type="email"
               {...register("email", {
-                reqired: true,
+                required: true,
                 validate: {
                   matchPatern: (value) =>
                     /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ||

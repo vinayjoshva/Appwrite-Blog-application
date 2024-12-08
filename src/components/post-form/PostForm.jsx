@@ -12,7 +12,7 @@ import { useSelector } from "react-redux";
 //to gain form's control
 //getValue - to grab form's values
 function PostForm({ post }) {
-  const { register, handleSubmit, watch, setValue, control, getValue } =
+  const { register, handleSubmit, watch, setValue, control, getValues } =
     useForm({
       //these default values are those that we use to work with.
       defaultValues: {
@@ -28,46 +28,55 @@ function PostForm({ post }) {
   //deal with - if user submitted the form what to do? - might have passed the data firstly,
   //there are 2 cases - first, post is already present if yes, update it. secondly, it post isn't there create it.
   const submit = async (data) => {
-    if (post) {
-      const file = data.image[0]
-        ? appwriteService.uploadFile(data.image[0])
-        : null;
-      if (file) {
-        appwriteService.deleteFile(post.featuredImage);
-      }
-      const dbPost = await appwriteService.updatePost(post.$id, {
-        ...data,
-        featuredImage: file ? file.$id : undefined,
+    try {
+      console.log("Post:", post);
+      console.log("Post $id:", post?.$id);
 
-        if(dbPost) {
-          navigate(`/post/${dbPost.$id}`);
-        },
-      });
-    } else {
-      const file = await appwriteService.uploadFile(data.image[0]);
-      //TODO: functionality check karo like the lines from 32-34 for improving (file hai tho upload karo)
-      if (file) {
-        const fileId = file.$id;
-        data.featuredImage = fileId;
-        const dbPost = await appwriteService.createPost({
+      if (post && post.$id) {
+        const file = data.image?.[0]
+          ? await appwriteService.uploadFile(data.image[0])
+          : null;
+        if (file) {
+          await appwriteService.deleteFile(post.featuredImage);
+        }
+        const dbPost = await appwriteService.updatePost(post.$id, {
           ...data,
-          userId: userData.$id,
+          featuredImage: file ? file.$id : undefined,
         });
+
         if (dbPost) {
           navigate(`/post/${dbPost.$id}`);
         }
+      } else {
+        const file = data.image?.[0]
+          ? await appwriteService.uploadFile(data.image[0])
+          : null;
+        //TODO: functionality check karo like the lines from 32-34 for improving (file hai tho upload karo)
+        if (file) {
+          const fileId = file.$id;
+          data.featuredImage = fileId;
+          const dbPost = await appwriteService.createPost({
+            ...data,
+            userid: userData?.$id,
+          });
+          if (dbPost) {
+            navigate(`/post/${dbPost.$id}`);
+          }
+        }
       }
+    } catch (error) {
+      console.error("Error in submit function:", error);
     }
   };
 
   //we'll write basic functionality here and the way it watched in userInput all can be put inside useEffect.
   const slugTransform = useCallback((value) => {
-    if (value && typeof value === "string") {
+    if (value && typeof value === "string")
       return value
         .trim()
         .toLowerCase()
-        .replace(/^[a-zA-Z\d]+/g, "-");
-    }
+        .replace(/[^a-zA-Z\d\s]+/g, "-")
+        .replace(/\s/g, "-");
     return "";
   }, []);
 
@@ -107,7 +116,7 @@ function PostForm({ post }) {
           label="Content :"
           name="content"
           control={control}
-          defaultValue={getValue("content")}
+          defaultValue={getValues("content")}
         />
       </div>
       <div className="w-1/3 px-2">

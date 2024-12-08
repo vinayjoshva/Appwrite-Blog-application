@@ -4,9 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux"; //to go into store and see if the user is logged in or not
 
 function Header() {
-  const authStatus = useSelector((state) => {
-    state.auth.status;
-  }); //we're fetching the initial state of the status from store
+  const authStatus = useSelector((state) => state.auth.status); //we're fetching the initial state of the status from store
   const navigate = useNavigate();
 
   const navItems = [
@@ -38,7 +36,7 @@ function Header() {
   ];
 
   return (
-    <header className="py-3 shadow bg-gray-500">
+    <header className="py-3 shadow bg-slate-950 border-b-2 border-b-slate-900">
       <Container>
         <nav className="flex">
           <div className="mr-4">
@@ -52,7 +50,7 @@ function Header() {
                 <li key={item.name}>
                   <button
                     onClick={() => navigate(item.slug)}
-                    className="inline-bock px-6 py-2 duration-200 hover:bg-blue-100 rounded-full"
+                    className="inline-bock px-6 py-2 duration-200 hover:bg-rose-500 rounded-full text-rose-400 hover:text-white"
                   >
                     {item.name}
                   </button>

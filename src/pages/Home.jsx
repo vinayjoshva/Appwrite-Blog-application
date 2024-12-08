@@ -1,34 +1,46 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import appwriteService from "../appwrite/config";
 import { Container, PostCard } from "../components";
 
 function Home() {
   const [posts, setPosts] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    appwriteService.allPosts().then((posts) => {
-      if (posts) {
-        setPosts(posts.documents);
+    const fetchPosts = async () => {
+      try {
+        const result = await appwriteService.allPosts();
+        if (result) {
+          setPosts(result.documents);
+        }
+      } catch (err) {
+        setError("Failed to fetch posts. Please try again.");
       }
-    });
+    };
+
+    fetchPosts();
   }, []);
+
+  if (error) {
+    return (
+      <div className="w-full py-8 mt-4 text-center">
+        <Container>
+          <h1 className="text-xl font-bold text-red-500">{error}</h1>
+        </Container>
+      </div>
+    );
+  }
 
   if (posts.length === 0) {
     return (
       <div className="w-full py-8 mt-4 text-center">
         <Container>
-          <div className="flex flex-wrap">
-            <div className="p-2 w-full">
-              <h1 className="text-2xl font-bold hover:text-gray-500">
-                Login to read Posts
-              </h1>
-            </div>
-          </div>
+          <h1 className="text-2xl font-bold">No posts available</h1>
         </Container>
       </div>
     );
   }
+
   return (
     <div className="w-full py-8">
       <Container>

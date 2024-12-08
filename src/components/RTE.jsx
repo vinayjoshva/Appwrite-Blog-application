@@ -6,13 +6,14 @@ export default function RTE({ name, control, label, defaultValue = "" }) {
   return (
     <div className="w-full">
       {label && <label className="inline-block mb-1 pl-1">{label}</label>}
-      //what is controller? - it'll pass entire control to elsewhere.
+      {/* what is controller? - it'll pass entire control to elsewhere. */}
       <Controller
         name={name || "content"} //we're using the passed parameters
         control={control} //gives control to the parent element where it's used.
         render={({ field: { onChange } }) => (
           //inside this, we render whatever we want.
           <Editor
+            apiKey="s3v6cnec4oqs9fxfgb1thj4sfavdzvcoygueoj5mhcac28dm"
             initialValue={defaultValue}
             init={{
               initialValue: defaultValue,

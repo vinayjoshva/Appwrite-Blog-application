@@ -1,6 +1,6 @@
 //here we are creating authentication service for our user accounts
 import { Client, Account, ID } from "appwrite";
-import conf from "../conf/conf";
+import conf from "../conf/conf.js";
 
 export class AuthService {
   client = new Client();
@@ -38,6 +38,7 @@ export class AuthService {
 
   async login({ email, password }) {
     try {
+      await this.logOutUsers(); // Clear existing sessions
       return await this.account.createEmailPasswordSession(email, password);
     } catch (error) {
       throw error;
@@ -46,18 +47,18 @@ export class AuthService {
 
   async getCurrentUser() {
     try {
-      return await this.account.get(this.account); //if account is not available at all
+      return await this.account.get(); //if account is not available at all
     } catch (error) {
-      throw error;
+      console.log("Failed to fetch current user:", error.message);
+      return null; // Return null if no user session exists
     }
-    return null;
   }
 
   async logOutUsers() {
     try {
-      return await this.account.deleteSessions();
+      await this.account.deleteSessions();
     } catch (error) {
-      throw error;
+      console.log("Appwrite serive :: logout :: error", error);
     }
   }
 }
