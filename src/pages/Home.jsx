@@ -6,20 +6,33 @@ function Home() {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const result = await appwriteService.allPosts();
-        if (result) {
-          setPosts(result.documents);
-        }
-      } catch (err) {
-        setError("Failed to fetch posts. Please try again.");
+  const fetchPosts = async () => {
+    try {
+      const result = await appwriteService.allPosts();
+      if (result) {
+        // Update posts, ensuring no duplicates
+        setPosts(result.documents);
       }
-    };
+    } catch (err) {
+      setError("Failed to fetch posts. Please try again.");
+    }
+  };
 
+  useEffect(() => {
     fetchPosts();
   }, []);
+
+  // Remove duplicates based on `$id`
+  const removeDuplicates = (posts) => {
+    const uniquePosts = new Map();
+    posts.forEach((post) => uniquePosts.set(post.$id, post));
+    return Array.from(uniquePosts.values());
+  };
+
+  // Update the list of posts (to avoid duplicates after editing)
+  useEffect(() => {
+    setPosts((prevPosts) => removeDuplicates(prevPosts));
+  }, [posts]);
 
   if (error) {
     return (
